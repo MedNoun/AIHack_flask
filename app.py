@@ -7,9 +7,11 @@ import re
 import numpy as np
 
 # Keras
+import keras
 from keras.applications.imagenet_utils import preprocess_input, decode_predictions
 from keras.models import load_model
 from keras.preprocessing import image
+
 
 # Flask utils
 from flask import Flask, redirect, url_for, request, render_template
@@ -20,11 +22,12 @@ from gevent.pywsgi import WSGIServer
 app = Flask(__name__)
 
 # Model saved with Keras model.save()
-MODEL_PATH = 'models/model_resnet.h5'
-
+MODEL_PATH = 'models/saved_model.h5'
+global CLASSES
+CLASSES= ["Black Soil", 'Cinder Soil', 'Laterite Soil', 'Peat Soil', 'Yellow Soil']
 # Load your trained model
 model = load_model(MODEL_PATH)
-model._make_predict_function()          # Necessary
+model.make_predict_function()          # Necessary
 # print('Model loaded. Start serving...')
 
 # You can also use pretrained model from Keras
@@ -36,21 +39,20 @@ print('Model loaded. Check http://127.0.0.1:5000/')
 
 
 def model_predict(img_path, model):
-    img = image.load_img(img_path, target_size=(224, 224))
+    img = keras.utils.load_img(img_path, target_size=(220, 220))
 
     # Preprocessing the image
-    x = image.img_to_array(img)
+    x = keras.utils.img_to_array(img)
     # x = np.true_divide(x, 255)
     x = np.expand_dims(x, axis=0)
-
-    # Be careful how your trained model deals with the input
-    # otherwise, it won't make correct prediction!
-    x = preprocess_input(x, mode='caffe')
-
     preds = model.predict(x)
     return preds
 
-
+def get_class(arr):
+    newarr = arr[0]
+    for i,el in enumerate(newarr):
+        if el ==1 :
+            return CLASSES[i]
 @app.route('/', methods=['GET'])
 def index():
     # Main page
@@ -73,10 +75,10 @@ def upload():
         preds = model_predict(file_path, model)
 
         # Process your result for human
-        # pred_class = preds.argmax(axis=-1)            # Simple argmax
-        pred_class = decode_predictions(preds, top=1)   # ImageNet Decode
-        result = str(pred_class[0][0][1])               # Convert to string
-        return result
+        # pred_class = preds.argmax(axis=-1)
+        #             # Simple argmax
+        classi = get_class(preds)
+        return classi
     return None
 
 
