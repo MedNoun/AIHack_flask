@@ -14,7 +14,7 @@ from keras.preprocessing import image
 
 
 # Flask utils
-from flask import Flask, redirect, url_for, request, render_template
+from flask import Flask, redirect, url_for, request, render_template,json, jsonify
 from werkzeug.utils import secure_filename
 from gevent.pywsgi import WSGIServer
 
@@ -24,7 +24,7 @@ app = Flask(__name__)
 # Model saved with Keras model.save()
 MODEL_PATH = 'models/saved_model.h5'
 global CLASSES
-CLASSES= ["Black Soil", 'Cinder Soil', 'Laterite Soil', 'Peat Soil', 'Yellow Soil']
+CLASSES= ["black", 'cinder', 'laterite', 'peat', 'yellow']
 # Load your trained model
 model = load_model(MODEL_PATH)
 model.make_predict_function()          # Necessary
@@ -77,8 +77,16 @@ def upload():
         # Process your result for human
         # pred_class = preds.argmax(axis=-1)
         #             # Simple argmax
+        SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+        json_url = os.path.join(SITE_ROOT, "static", "trees.json")
+        data = json.load(open(json_url))
         classi = get_class(preds)
-        return classi
+        for el in data :
+            
+            # print(el)
+            if el["type"] == classi :
+                return el
+        return jsonify(classi)
     return None
 
 

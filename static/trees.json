@@ -1,0 +1,7 @@
+[
+  { "type": "black", "trees": ["spruce", "beech"] },
+  { "type": "cinder", "trees": ["Beet Plant", "Eggplant"] },
+  { "type": "Laterite", "trees": ["beech", "tea"] },
+  { "type": "peat", "trees": ["maple", "Eggplant"] },
+  { "type": "yellow", "trees": ["spruce", "Beech Trees"] }
+]
